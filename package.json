@@ -1,0 +1,15 @@
+{
+  "name": "planning-poker",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": { "node": ">=22" },
+  "pnpm": { "onlyBuiltDependencies": ["esbuild"] },
+  "repository": { "type": "git", "url": "git+https://github.com/freeappstore-online/planning-poker.git" },
+  "scripts": {
+    "dev": "pnpm --filter @planning-poker/web dev",
+    "build": "pnpm --filter @planning-poker/web build",
+    "preview": "pnpm --filter @planning-poker/web preview",
+    "typecheck": "pnpm --filter @planning-poker/web exec tsc -b",
+    "test": "pnpm --filter @planning-poker/web exec tsc -b"
+  }
+}
