@@ -38,10 +38,10 @@
   --bg-start: #ffffff;
   --bg-mid: #fafafa;
   --bg-end: #f5f5f5;
-  --glow-warm: rgba(216, 111, 77, 0.16);
-  --glow-cool: rgba(76, 151, 181, 0.16);
-  --bg-blob-1: rgba(216, 111, 77, 0.07);
-  --bg-blob-2: rgba(76, 151, 181, 0.07);
+  --glow-warm: transparent;
+  --glow-cool: transparent;
+  --bg-blob-1: transparent;
+  --bg-blob-2: transparent;
   --content-scale: 1;
   --shadow-soft: 0 28px 70px rgba(24, 44, 104, 0.12);
   --shadow-card: 0 12px 28px rgba(26, 41, 81, 0.08);
@@ -95,10 +95,10 @@
   --bg-start: #000000;
   --bg-mid: #050505;
   --bg-end: #0a0a0a;
-  --glow-warm: rgba(255, 155, 118, 0.07);
-  --glow-cool: rgba(137, 203, 229, 0.06);
-  --bg-blob-1: rgba(255, 155, 118, 0.05);
-  --bg-blob-2: rgba(137, 203, 229, 0.05);
+  --glow-warm: transparent;
+  --glow-cool: transparent;
+  --bg-blob-1: transparent;
+  --bg-blob-2: transparent;
   --shadow-soft: 0 28px 70px rgba(0, 0, 0, 0.6);
   --shadow-card: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
@@ -120,34 +120,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
-  letter-spacing: -0.015em;
-}
-
-body::before,
-body::after {
-  content: '';
-  position: fixed;
-  inset: auto;
-  pointer-events: none;
-  z-index: -1;
-  border-radius: 999px;
-  filter: blur(70px);
-}
-
-body::before {
-  left: -10rem;
-  top: 10rem;
-  height: 20rem;
-  width: 20rem;
-  background: var(--glow-warm);
-}
-
-body::after {
-  right: -8rem;
-  bottom: 8rem;
-  height: 18rem;
-  width: 18rem;
-  background: var(--glow-cool);
+  letter-spacing: 0;
 }
 
 #root {
@@ -165,7 +138,7 @@ button, a, nav, [role="button"], label {
 .display-font {
   font-family: 'Fraunces', Georgia, serif;
   font-variation-settings: 'SOFT' 80, 'WONK' 0;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 
 ::-webkit-scrollbar {
