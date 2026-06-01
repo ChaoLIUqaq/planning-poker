@@ -145,6 +145,12 @@ export default function App() {
               </section>
             </div>
           ) : null}
+          <footer className="py-4 text-center text-sm text-[var(--muted)]">
+            Part of{' '}
+            <a className="font-bold text-[var(--accent)]" href="https://freeappstore.online" rel="noreferrer" target="_blank">
+              FreeAppStore
+            </a>
+          </footer>
         </main>
         )}
         <ConfirmDialog
