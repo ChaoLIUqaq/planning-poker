@@ -5,6 +5,7 @@ import type { Ticket, TicketInput } from '../../types/ticket'
 type TicketPanelProps = {
   activeTicket: Ticket | null
   isAdmin: boolean
+  onNotify?: (message: string, variant: 'success' | 'error') => void
   onCreate: (input: TicketInput) => Promise<void>
   onDelete: (ticketId: string) => Promise<void>
   onSelect: (ticketId: string) => Promise<void>
@@ -17,6 +18,7 @@ const emptyTicket = { title: '', description: '' }
 export function TicketPanel({
   activeTicket,
   isAdmin,
+  onNotify,
   onCreate,
   onDelete,
   onSelect,
@@ -37,6 +39,7 @@ export function TicketPanel({
   async function saveTicket() {
     if (!draft.title.trim()) {
       setError('Ticket title is required.')
+      onNotify?.('Ticket title is required', 'error')
       return
     }
 

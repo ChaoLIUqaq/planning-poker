@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { initApp } from '@freeappstore/sdk'
 import { useAuth } from '@freeappstore/sdk/hooks'
 import { Badge, BuildInfo, ConfirmDialog, ErrorBoundary, FasShell, Modal, Spinner } from '@freeappstore/sdk/ui'
 import { AdminControls } from './components/admin/AdminControls'
 import { EntryScreen } from './components/common/EntryScreen'
+import { ToastStack, type ToastMessage } from './components/common/ToastStack'
 import { RoundHistory } from './components/rounds/RoundHistory'
 import { TicketPanel } from './components/ticket/TicketPanel'
 import { VoteBoard } from './components/voting/VoteBoard'
@@ -15,6 +16,7 @@ const fas = initApp({ appId: 'planning-poker' })
 
 export default function App() {
   const [endDialogOpen, setEndDialogOpen] = useState(false)
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
   const { signIn, user } = useAuth(fas)
   const sessionAccess = useSessionAccess()
   const participantName = user?.login ?? ''
@@ -27,10 +29,30 @@ export default function App() {
       ...poker.activeVotes.map((vote) => vote.participantName),
     ].filter(Boolean)),
   )
+  const notify = useCallback((message: string, variant: ToastMessage['variant'] = 'success') => {
+    const id = crypto.randomUUID()
+    setToasts((current) => [...current, { id, message, variant }])
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((toast) => toast.id !== id))
+    }, 2800)
+  }, [])
+
+  const runWithToast = useCallback(
+    async (action: () => Promise<void>, successMessage: string) => {
+      try {
+        await action()
+        notify(successMessage, 'success')
+      } catch (caught) {
+        notify(caught instanceof Error ? caught.message : 'Something went wrong', 'error')
+      }
+    },
+    [notify],
+  )
 
   return (
     <FasShell app={fas} appName="Planning Poker" showThemeToggle>
       <ErrorBoundary>
+        <ToastStack toasts={toasts} />
         {!hasSessionIdentity ? (
           <EntryScreen
             initialSessionId={sessionAccess.sessionId}
@@ -111,10 +133,13 @@ export default function App() {
                 <TicketPanel
                   activeTicket={poker.activeTicket}
                   isAdmin={poker.isAdmin && poker.canInteract}
-                  onCreate={poker.createTicket}
-                  onDelete={poker.deleteTicket}
+                  onCreate={(input) => runWithToast(() => poker.createTicket(input), 'Ticket created successfully')}
+                  onDelete={(ticketId) => runWithToast(() => poker.deleteTicket(ticketId), 'Ticket deleted')}
+                  onNotify={notify}
                   onSelect={poker.selectTicket}
-                  onUpdate={poker.updateTicket}
+                  onUpdate={(ticketId, input) =>
+                    runWithToast(() => poker.updateTicket(ticketId, input), 'Ticket updated successfully')
+                  }
                   tickets={poker.tickets}
                 />
                 <RoundHistory rounds={poker.previousRounds} votes={poker.votes} />
@@ -123,14 +148,14 @@ export default function App() {
               <section className="grid content-start gap-6">
                 <VoteBoard
                   isAdmin={poker.isAdmin && poker.canInteract}
-                  onReveal={poker.revealRound}
+                  onReveal={() => runWithToast(poker.revealRound, 'Votes revealed')}
                   participantNames={participantNames}
                   round={poker.activeRound}
                   votes={poker.activeVotes}
                 />
                 <VotingPanel
                   currentUserVote={poker.currentUserVote}
-                  onSubmit={poker.submitVote}
+                  onSubmit={(input) => runWithToast(() => poker.submitVote(input), 'Vote submitted')}
                   participantName={participantName}
                   round={poker.activeRound}
                   ticket={poker.canInteract ? poker.activeTicket : null}
@@ -139,8 +164,10 @@ export default function App() {
                   activeRound={poker.activeRound}
                   activeTicket={poker.activeTicket}
                   isAdmin={poker.isAdmin && poker.canInteract}
-                  onConfirmEstimate={poker.confirmFinalEstimate}
-                  onStartRound={poker.startNewRound}
+                  onConfirmEstimate={(estimate) =>
+                    runWithToast(() => poker.confirmFinalEstimate(estimate), 'Consensus estimate recorded')
+                  }
+                  onStartRound={() => runWithToast(poker.startNewRound, 'New round started')}
                 />
               </section>
             </div>
@@ -159,7 +186,7 @@ export default function App() {
           onCancel={() => setEndDialogOpen(false)}
           onConfirm={() => {
             setEndDialogOpen(false)
-            void poker.endSession()
+            void runWithToast(poker.endSession, 'Session ended')
           }}
           open={endDialogOpen}
           title="End this session?"
